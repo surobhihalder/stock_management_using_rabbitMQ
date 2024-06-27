@@ -1,0 +1,107 @@
+version: "3.2"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 9900787101
+      MYSQL_DATABASE: inventory_management_system
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  rabbit_mq:
+    image: rabbitmq:3.8-rc-management
+    hostname: rabbit_mq
+    ports:
+        - '5672:5672'
+        - '15672:15672'
+    volumes:
+      - rabbit_mqdata:/var/lib/rabbitmq
+
+  producer:
+    build: ./producer
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+      - rabbit_mq
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbit_mq:5672/'
+      DB_USER: 'root'
+      DB_PASSWORD: '9900787101'
+      DB_HOST: 'db'
+      DB_NAME: 'inventory_management_system'
+    volumes:
+      - ./producer:/app
+
+  hc_cone:
+    build: ./hc_cone
+    ports:
+      - '5001:5001'
+    depends_on:
+      - rabbit_mq
+      - db
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbit_mq:5672/'
+      DB_USER: 'root'
+      DB_PASSWORD: '9900787101'
+      DB_HOST: 'db'
+      DB_NAME: 'inventory_management_system'
+    volumes:
+      - ./hc_cone:/app
+
+  ic_ctwo:
+    build: ./ic_ctwo
+    ports:
+      - '5002:5002'
+    depends_on:
+      - rabbit_mq
+      - db
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbit_mq:5672/'
+      DB_USER: 'root'
+      DB_PASSWORD: '9900787101'
+      DB_HOST: 'db'
+      DB_NAME: 'inventory_management_system'
+    volumes:
+      - ./ic_ctwo:/app
+
+  sm_cthree:
+    build: ./sm_cthree
+    ports:
+      - '5003:5003'
+    depends_on:
+      - rabbit_mq
+      - db
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbit_mq:5672/'
+      DB_USER: 'root'
+      DB_PASSWORD: '9900787101'
+      DB_HOST: 'db'
+      DB_NAME: 'inventory_management_system'
+    volumes:
+      - ./sm_cthree:/app
+
+  op_cfour:
+    build: ./op_cfour
+    ports:
+      - '5004:5004'
+    depends_on:
+      - rabbit_mq
+      - db
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbit_mq:5672/'
+      DB_USER: 'root'
+      DB_PASSWORD: '9900787101'
+      DB_HOST: 'db'
+      DB_NAME: 'inventory_management_system'
+    volumes:
+      - ./op_cfour:/app
+
+volumes:
+  dbdata:
+    driver: local
+  rabbit_mqdata:
+    driver: local
